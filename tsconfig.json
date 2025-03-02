@@ -1,0 +1,17 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    },
+    {
+      "path": "./tsconfig.app.json"
+    }
+  ],
+  "compilerOptions": {
+    // 其他配置...
+    "types": ["node"],
+  }
+}
+
+// 新增的配置项 "types": ["node"]，表示该项目需要引用 Node.js 内置模块。    
