@@ -5,7 +5,7 @@
       <h2>学生管理系统</h2>
       <div class="user-info">
         <img src="@/assets/avatar.jpg" alt="头像" class="avatar" />
-        <span class="student-name">{{ username }}</span>
+        <span class="student-name">{{ userName }}</span>
         <el-button @click="handleLogout">退出登录</el-button>
       </div>
     </el-header>
@@ -71,7 +71,8 @@ export default defineComponent({
   name: 'HomePage',
   setup() {
     const userStore = useUserStore();
-    const { username } = toRefs(userStore);
+    // 修改为正确的属性名 userName
+    const { userName } = toRefs(userStore);
     const router = useRouter();
 
     // 定义 notices 为响应式变量
@@ -95,7 +96,7 @@ export default defineComponent({
     ];
 
     return {
-      username,
+      userName,
       leaveStats,
       notices,
       recentLeaves,

@@ -60,13 +60,43 @@ export default {
     };
 
     // 登录逻辑
-    const handleLogin = () => {
+    const handleLogin = async () => {
       validateUsername();
       validatePassword();
       if (!errors.username && !errors.password) {
-        if (/^[a-zA-Z]/.test(form.username) && form.password.length >= 5 && form.password.length <= 20) {
-          userStore.login(form.username); // 更新登录状态
-          router.replace('/home-page'); // 跳转到主页
+        try {
+          // 发送登录请求
+          const response = await fetch('http://127.0.0.1:4523/m1/5949162-5637165-default/user-login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              username: form.username,
+              password: form.password,
+            }),
+          });
+
+          // 解析响应数据
+          const result = await response.json();
+          if (result.code === 0) {
+            // 登录成功，更新用户状态
+            userStore.login({
+              id: result.data.id,
+              name: result.data.name,
+              token: result.data.token,
+              userName: result.data.userName,
+            });
+            console.log('登录成功');
+            // 跳转到主页
+            router.replace('/home-page');
+          } else {
+            // 登录失败，显示错误信息
+            alert(result.msg || '登录失败，请重试');
+          }
+        } catch (error) {
+          console.error('登录请求失败', error);
+          alert('登录请求失败，请检查网络连接');
         }
       }
     };
@@ -140,8 +170,6 @@ export default {
 .user-login button:hover {
   background-color: #0056b3;
 }
-
-
 
 .user-login a {
   color: #007bff;
