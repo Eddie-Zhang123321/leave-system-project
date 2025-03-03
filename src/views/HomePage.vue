@@ -90,19 +90,32 @@ export default defineComponent({
 
     // 其他数据
     const leaveStats = ref({ monthlyCount: 0, remainingDays: 0 });
-    const fetchLeaveStats = async () => {
+    const fetchLeaveStats = async (userName: string) => {
       try {
-        const response = await axios.get('http://127.0.0.1:4523/m1/5949162-5637165-default/api/leave-stats');
-        leaveStats.value = response.data;
+        const response = await axios.post('http://127.0.0.1:4523/m1/5949162-5637165-default/api/leave-stats', {
+          userName: userName, // 传递 userName 参数
+        }, {
+          headers: {
+            'Content-Type': 'application/json', // 设置请求头
+          },
+        });
+        leaveStats.value = response.data; // 更新响应式数据
       } catch (error) {
         console.error('获取请假统计数据失败:', error);
       }
     };
-    const recentLeaves = ref([]); // 使用 ref 来定义响应式数据
 
-    const fetchRecentLeaves = async () => {
+    // 获取最近请假记录
+    const recentLeaves = ref([]); // 使用 ref 来定义响应式数据
+    const fetchRecentLeaves = async (userName: string) => {
       try {
-        const { data } = await axios.get('http://127.0.0.1:4523/m1/5949162-5637165-default/api/recent-leaves'); // 解构赋值
+        const { data } = await axios.post('http://127.0.0.1:4523/m1/5949162-5637165-default/api/recent-leaves', {
+          userName: userName, // 传递 userName 参数
+        }, {
+          headers: {
+            'Content-Type': 'application/json', // 设置请求头
+          },
+        });
         recentLeaves.value = data; // 更新响应式数据
       } catch (error) {
         console.error('获取最近请假记录失败:', error);
@@ -110,8 +123,8 @@ export default defineComponent({
     };
 
     // 调用函数以获取数据
-    fetchLeaveStats();
-    fetchRecentLeaves();
+    fetchLeaveStats(userStore.userName);
+    fetchRecentLeaves(userStore.userName);
 
 
     return {
