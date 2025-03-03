@@ -89,11 +89,30 @@ export default defineComponent({
     });
 
     // 其他数据
-    const leaveStats = { monthlyCount: 5, remainingDays: 10 };
-    const recentLeaves = [
-      { date: '2023-10-02', reason: '生病', status: '已批准' },
-      { date: '2023-10-05', reason: '家庭事务', status: '待审批' },
-    ];
+    const leaveStats = ref({ monthlyCount: 0, remainingDays: 0 });
+    const fetchLeaveStats = async () => {
+      try {
+        const response = await axios.get('http://127.0.0.1:4523/m1/5949162-5637165-default/api/leave-stats');
+        leaveStats.value = response.data;
+      } catch (error) {
+        console.error('获取请假统计数据失败:', error);
+      }
+    };
+    const recentLeaves = ref([]); // 使用 ref 来定义响应式数据
+
+    const fetchRecentLeaves = async () => {
+      try {
+        const { data } = await axios.get('http://127.0.0.1:4523/m1/5949162-5637165-default/api/recent-leaves'); // 解构赋值
+        recentLeaves.value = data; // 更新响应式数据
+      } catch (error) {
+        console.error('获取最近请假记录失败:', error);
+      }
+    };
+
+    // 调用函数以获取数据
+    fetchLeaveStats();
+    fetchRecentLeaves();
+
 
     return {
       userName,
