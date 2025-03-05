@@ -52,6 +52,7 @@ import { reactive, onMounted, ref } from 'vue';
 import { useUserStore } from '@/stores/userStore'; // 引入 userStore
 import { ElMessage } from 'element-plus';
 import type { FormInstance } from 'element-plus'; // 引入 FormInstance 类型
+import axios from 'axios';
 
 const userStore = useUserStore();
 const profileForm = ref<FormInstance | null>(null); // 明确类型为 FormInstance 或 null
@@ -72,33 +73,65 @@ onMounted(() => {
 });
 
 // 提交表单
-const handleSubmit = () => {
+const handleSubmit = async () => {
   if (!profileForm.value) return; // 确保 profileForm.value 不为 null
 
-  profileForm.value.validate((valid: boolean) => {
+  profileForm.value.validate(async (valid: boolean) => {
     if (valid) {
-      // 更新 userStore 中的数据
-      userStore.name = formData.realName;
-      userStore.gender = formData.gender;
-      userStore.age = formData.age;
-      userStore.phone = formData.phone;
-      userStore.email = formData.email;
+      try {
+        // 转换性别值为接口规范的值
+        const genderMap = {
+          男: 1,    // 男生
+          女: 0,    // 女生
+          '': null, // 未定
+        };
 
-      // 提示保存成功
-      ElMessage.success('个人信息已更新');
+        // 构造请求数据
+        const payload = {
+          name: formData.realName,
+          gender: genderMap[formData.gender] ?? null, // 转换性别值，如果未匹配则默认为 null
+          age: formData.age,
+          phone: formData.phone,
+          email: formData.email,
+        };
+
+        // 发送请求
+        const response = await axios.put('http://127.0.0.1:4523/m1/5949162-5637165-default/api/v1/user/profile', payload, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': userStore.token
+          },
+        });
+
+        // 处理响应
+        if (response.data.code === 200) {
+          // 更新 userStore 中的数据
+          userStore.name = formData.realName;
+          userStore.gender = formData.gender; // 这里可以保持前端原始值
+          userStore.age = formData.age;
+          userStore.phone = formData.phone;
+          userStore.email = formData.email;
+
+          // 提示保存成功
+          ElMessage.success('个人信息已更新');
+        } else {
+          ElMessage.error(response.data.message || '更新失败');
+        }
+      } catch (error) {
+        // 处理错误
+        ElMessage.error('请求失败，请稍后重试');
+        console.error('请求失败:', error);
+      }
     } else {
       ElMessage.error('请填写完整信息');
     }
   });
 };
 
-
+// 返回上一页
 const back = () => {
-  // 跳转到上一页
   window.history.back();
 };
-
-
 </script>
 
 <style scoped>

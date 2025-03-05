@@ -27,16 +27,22 @@
 <script lang="ts">
 import { reactive } from 'vue';
 import { useRouter } from 'vue-router'; // 引入 Vue Router
+import { useUserStore } from '@/stores/userStore';
 
 export default {
   name: 'UserRegister',
   setup() {
+    const userStore = useUserStore();
     const router = useRouter(); // 获取 Router
+
+    // 表单数据
     const form = reactive({
       username: '',
       password: '',
       confirmPassword: '',
     });
+
+    // 错误信息
     const errors = reactive({
       username: '',
       password: '',
@@ -85,14 +91,46 @@ export default {
     };
 
     // 注册逻辑
-    const handleRegister = () => {
+    const handleRegister = async () => {
       if (validateForm()) {
-        // 模拟注册逻辑
-        console.log('注册成功', form);
-        router.replace('/user-login'); // 跳转到登录页
+        try {
+          // 发送注册请求
+          const response = await fetch('http://127.0.0.1:4523/m1/5949162-5637165-default/api/register', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              username: form.username,
+              password: form.password,
+            }),
+          });
+
+          // 解析响应数据
+          const result = await response.json();
+          if (result.code === 0) {
+            // 注册成功，更新用户状态
+            userStore.login({
+              id: result.data.id,
+              name: result.data.name,
+              token: result.data.token,
+              userName: result.data.userName,
+            });
+            console.log('注册成功');
+            // 跳转到主页
+            router.replace('/home-page');
+          } else {
+            // 注册失败，显示错误信息
+            alert(result.msg || '注册失败，请重试');
+          }
+        } catch (error) {
+          console.error('注册请求失败', error);
+          alert('注册请求失败，请检查网络连接');
+        }
       }
     };
 
+    // 返回模板中需要使用的数据和方法
     return {
       form,
       errors,
