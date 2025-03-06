@@ -5,6 +5,7 @@ import ApplyLeave from '@/views/ApplyLeave.vue'
 import { useUserStore } from '@/stores/userStore' // 引入 Pinia Store
 import UserRegister from '@/views/UserRegister.vue'
 import ProfileModify from '@/views/ProfileModify.vue'
+import LeaveRecord from '@/views/LeaveRecord.vue'
 
 const routes = [
   { path: '/', redirect: '/user-login' }, // 默认跳转到登录页面
@@ -23,6 +24,11 @@ const routes = [
   {
     path: '/profile',
     component: ProfileModify,
+    meta: { requiresAuth: true }, // 需要登录
+  },
+  {
+    path: '/leave-records',
+    component: LeaveRecord,
     meta: { requiresAuth: true }, // 需要登录
   },
 ]

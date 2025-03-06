@@ -71,7 +71,6 @@ export default defineComponent({
   name: 'HomePage',
   setup() {
     const userStore = useUserStore();
-    // 修改为正确的属性名 userName
     const { userName } = toRefs(userStore);
     const router = useRouter();
 
@@ -90,10 +89,10 @@ export default defineComponent({
 
     // 其他数据
     const leaveStats = ref({ monthlyCount: 0, remainingDays: 0 });
-    const fetchLeaveStats = async (userName: string) => {
+    const fetchLeaveStats = async () => {
       try {
         const response = await axios.post('http://127.0.0.1:4523/m1/5949162-5637165-default/api/leave-stats', {
-          userName: userName, // 传递 userName 参数
+          userName: userName.value, // 使用 userName.value
         }, {
           headers: {
             'Content-Type': 'application/json', // 设置请求头
@@ -107,25 +106,25 @@ export default defineComponent({
 
     // 获取最近请假记录
     const recentLeaves = ref([]); // 使用 ref 来定义响应式数据
-    const fetchRecentLeaves = async (userName: string) => {
+    const fetchRecentLeaves = async () => {
       try {
-        const { data } = await axios.post('http://127.0.0.1:4523/m1/5949162-5637165-default/api/recent-leaves', {
-          userName: userName, // 传递 userName 参数
+        const response = await axios.post('http://127.0.0.1:4523/m1/5949162-5637165-default/api/recent-leaves', {
+          userName: userName.value, // 使用 userName.value
         }, {
           headers: {
             'Content-Type': 'application/json', // 设置请求头
           },
         });
-        recentLeaves.value = data; // 更新响应式数据
+        // 假设接口返回的数据格式为 { code: 0, msg: 'success', data: [...] }
+        recentLeaves.value = response.data.data; // 提取数组字段
       } catch (error) {
         console.error('获取最近请假记录失败:', error);
       }
     };
 
     // 调用函数以获取数据
-    fetchLeaveStats(userStore.userName);
-    fetchRecentLeaves(userStore.userName);
-
+    fetchLeaveStats();
+    fetchRecentLeaves();
 
     return {
       userName,
@@ -144,38 +143,26 @@ export default defineComponent({
 <style scoped>
 .user-info {
   display: flex;
-  /* 启用 Flexbox 布局 */
   align-items: center;
-  /* 垂直居中对齐 */
   gap: 10px;
-  /* 设置元素之间的间距 */
 }
 
 .avatar {
   width: 40px;
-  /* 设置头像宽度 */
   height: 40px;
-  /* 设置头像高度 */
   border-radius: 50%;
-  /* 将头像变为圆形 */
   object-fit: cover;
-  /* 保持图片比例，填充整个容器 */
 }
 
 .student-name {
   font-size: 16px;
-  /* 设置字体大小 */
   font-weight: bold;
-  /* 设置字体加粗 */
   margin-right: 10px;
-  /* 设置右边距 */
 }
 
 .el-button {
   margin-left: auto;
-  /* 将按钮推到最右边 */
 }
-
 
 .navbar {
   background-color: #409eff;
@@ -184,10 +171,6 @@ export default defineComponent({
   justify-content: space-between;
   align-items: center;
   padding: 0 20px;
-}
-
-.nav-links .student-name {
-  margin-right: 20px;
 }
 
 .main-content {
